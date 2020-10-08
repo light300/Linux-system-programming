@@ -90,10 +90,18 @@ int pars_cmd (char buffer[], char *arglist[])
 	return arg_num;
 }
 
+int builtin_cmd_cd (char path[]);
+int is_builtin_cmd (char *arglist[]);
+
 int exec_cmd (char *arglist[])
 {
 	if (arglist[0] == 0)
 		return 0;
+	if (is_builtin_cmd(arglist)) {
+		builtin_cmd_cd(arglist[1]);
+		return 0;
+	}
+
 	int ret_from_fork;
     int child_ret_status;
     
