@@ -4,11 +4,14 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <pwd.h>
+#include <time.h>
 
 int read_cmd (char buffer[]);
 int pars_cmd (char buffer[], char *arglist[]);
 int exec_cmd (char *arglist[]);
 int free_cmd (char *arglist[], int arg_num);
+void print_cmd_user(void);
 
 int main (void)
 {
@@ -17,6 +20,7 @@ int main (void)
 	int arg_num = 0;
 
 	while (1) {
+		print_cmd_user();
 		read_cmd (buffer);
 		arg_num = pars_cmd (buffer, arglist);
 		exec_cmd (arglist);
@@ -28,6 +32,19 @@ int main (void)
 	printf("main shell exit\n");
 
 	return 0;
+}
+
+void print_cmd_user(void)
+{
+	struct passwd *pwd;
+	pwd = getpwuid(getuid());
+	char path[256];
+	getcwd(path, 256);
+	time_t timep;
+	struct tm *p;
+	time(&timep);
+	p = localtime(&timep);
+	printf("\033[35;1;40m%s@mysh:\033[34m%s\033[33m[%d:%d:%d]\033[32m#\033[0m", pwd->pw_name, path, p->tm_hour, p->tm_min, p->tm_sec);
 }
 
 int read_cmd (char buffer[])
@@ -75,6 +92,8 @@ int pars_cmd (char buffer[], char *arglist[])
 
 int exec_cmd (char *arglist[])
 {
+	if (arglist[0] == 0)
+		return 0;
 	int ret_from_fork;
     int child_ret_status;
     
