@@ -14,6 +14,12 @@ int exec_cmd (char *arglist[]);
 int free_cmd (char *arglist[], int arg_num);
 void print_cmd_user(void);
 
+int background_exec = 0;
+/*
+	1: background exec mode
+	0: normal mode
+*/
+
 int main (void)
 {
 	char buffer[512] = {0};
@@ -71,6 +77,15 @@ int pars_cmd (char buffer[], char *arglist[])
     int len;
     char *start;
     char c;
+	while (*cp != '\0' && *cp != '\n') {
+		if (*cp == '&') {
+			background_exec = 1;
+			*cp = '\0';
+			break;
+		}
+		cp++;
+	}
+	cp = buffer;
     while (*cp != '\0') {
         while (*cp == ' ' || *cp == '\t')
             cp++;
@@ -115,10 +130,16 @@ int exec_cmd (char *arglist[])
         exit(EXIT_FAILURE);
     } else if (ret_from_fork > 0) {
         signal(SIGINT, SIG_IGN);
-		if (wait(&child_ret_status) ==  -1) {
-            perror("wait");
-            exit(EXIT_FAILURE);
-        }
+		if (background_exec == 1) {
+			background_exec = 0;
+			signal(SIGCHLD, SIG_IGN);
+		} else { 
+			signal(SIGCHLD, SIG_DFL);
+			if (wait(&child_ret_status) ==  -1) {
+            	perror("wait");
+            	exit(EXIT_FAILURE);
+        	}
+		}
     } else {
         perror("fork");
         exit(EXIT_FAILURE);
