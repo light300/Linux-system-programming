@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <pwd.h>
 #include <time.h>
+#include <signal.h>
 
 int read_cmd (char buffer[]);
 int pars_cmd (char buffer[], char *arglist[]);
@@ -44,7 +45,7 @@ void print_cmd_user(void)
 	struct tm *p;
 	time(&timep);
 	p = localtime(&timep);
-	printf("\033[35;1;40m%s@mysh:\033[34m%s\033[33m[%d:%d:%d]\033[32m#\033[0m", pwd->pw_name, path, p->tm_hour, p->tm_min, p->tm_sec);
+	printf("\033[35;1;40m%s@mysh:\033[34m%s\033[33m [%d:%d:%d] \033[32m\n>>> \033[0m", pwd->pw_name, path, p->tm_hour, p->tm_min, p->tm_sec);
 }
 
 int read_cmd (char buffer[])
@@ -108,11 +109,13 @@ int exec_cmd (char *arglist[])
     ret_from_fork = fork();
     
     if (ret_from_fork == 0) {
+		signal(SIGINT, SIG_DFL);
         execvp(arglist[0], arglist);
         perror("execvp");
         exit(EXIT_FAILURE);
     } else if (ret_from_fork > 0) {
-        if (wait(&child_ret_status) ==  -1) {
+        signal(SIGINT, SIG_IGN);
+		if (wait(&child_ret_status) ==  -1) {
             perror("wait");
             exit(EXIT_FAILURE);
         }
