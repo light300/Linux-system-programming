@@ -163,10 +163,12 @@ int is_pipe_command (char buffer[])
     while (*cp != '\n' && *cp != '\0')
     {
         if (strncmp (cp, "|", 1) == 0)
-            return 1;
+            pipe_mode++;
+			//return 1;
         cp++;
     }
-    return 0;
+    //return 0;
+	return pipe_mode;
 }
 
 int exec_cmdline (char *arglist[], char buffer[])
@@ -187,7 +189,8 @@ int exec_cmdline (char *arglist[], char buffer[])
         	exec_builtin_cmd(arglist);
 			return 0;
 		}
-		if (pipe_mode == 1) {
+		//if (pipe_mode == 1) {
+		if (pipe_mode > 0) {
 			int fd[2];
 			if (pipe(fd) == -1) {
 				perror("pipe");
@@ -195,7 +198,8 @@ int exec_cmdline (char *arglist[], char buffer[])
 			}
 			exec_cmd(arglist, fd_tmp, fd[1]);
 			fd_tmp = fd[0];
-			pipe_mode = 0;
+			//pipe_mode = 0;
+			pipe_mode--;
 		} else {
 			exec_cmd(arglist, fd_tmp, 1);
 		}
