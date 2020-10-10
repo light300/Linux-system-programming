@@ -16,6 +16,15 @@ int exec_script (char pathname[], char buffer[], char *arglist[]);
 int free_cmd (char *arglist[], int arg_num);
 void print_cmd_user(void);
 
+struct ctl_cmd_info{
+    int if_result;
+    int if_block;
+    int else_block;
+};
+int is_control_cmdline (char buffer[]);
+int is_exec_cmdline (struct ctl_cmd_info cmd_info);
+void process_control_cmdline (char buf[], struct ctl_cmd_info *cmd_info);
+
 int background_exec = 0;
 /*
 	1: background exec mode
@@ -169,10 +178,8 @@ int is_pipe_command (char buffer[])
     {
         if (strncmp (cp, "|", 1) == 0)
             pipe_mode++;
-			//return 1;
         cp++;
     }
-    //return 0;
 	return pipe_mode;
 }
 
@@ -194,7 +201,6 @@ int exec_cmdline (char *arglist[], char buffer[])
         	exec_builtin_cmd(arglist);
 			return 0;
 		}
-		//if (pipe_mode == 1) {
 		if (pipe_mode > 0) {
 			int fd[2];
 			if (pipe(fd) == -1) {
@@ -203,7 +209,6 @@ int exec_cmdline (char *arglist[], char buffer[])
 			}
 			exec_cmd(arglist, fd_tmp, fd[1]);
 			fd_tmp = fd[0];
-			//pipe_mode = 0;
 			pipe_mode--;
 		} else {
 			exec_cmd(arglist, fd_tmp, 1);
@@ -226,13 +231,21 @@ int exec_script (char pathname[], char buffer[], char *arglist[])
 	}
 	char c;
 	int pos = 0;
+	struct ctl_cmd_info cmd_info = {0,0,0};
 	while (1) {
 		c = getc(fp);
 		if (c == '\n' || c == EOF) {
 			buffer[pos++] = '\0';
-			if (strlen(buffer) == 0)
-				break;
-			exec_cmdline (arglist, buffer);
+			if (strlen(buffer) == 1 && c =='\n')
+				continue;
+			if (is_control_cmdline(buffer)) {
+				process_control_cmdline(buffer, &cmd_info);
+				memset (buffer, '\0', 512);
+				pos = 0;
+				continue;
+			}
+			if (is_exec_cmdline(cmd_info))
+				exec_cmdline(arglist, buffer);
 			memset(buffer, '\0', 512);
 			memset(arglist, 0, 80);
 			pos = 0;
