@@ -12,6 +12,7 @@ int read_cmd (char buffer[]);
 int pars_cmd (char buffer[], char *arglist[]);
 int exec_cmd (char *arglist[], int fd_in, int fd_out);
 int exec_cmdline  (char *arglist[], char buffer[]);
+int exec_script (char pathname[], char buffer[], char *arglist[]);
 int free_cmd (char *arglist[], int arg_num);
 void print_cmd_user(void);
 
@@ -27,17 +28,21 @@ int pipe_mode = 0;
     0: normal mode
 */
 
-int main (void)
+int main (int argc, char *argv[])
 {
 	char buffer[512] = {0};
 	char *arglist[20] = {0};
-
-	while (1) {
-		print_cmd_user();
-		read_cmd (buffer);
-		exec_cmdline (arglist, buffer);
-		memset (buffer, '\0', 512);
-		memset (arglist, 0, 80);
+	
+	if (argc == 1) {
+		while (1) {
+			print_cmd_user();
+			read_cmd(buffer);
+			exec_cmdline(arglist, buffer);
+			memset(buffer, '\0', 512);
+			memset(arglist, 0, 80);
+		}
+	} else {
+		exec_script(argv[1], buffer, arglist);
 	}
 
 	printf("main shell exit\n");
@@ -208,6 +213,36 @@ int exec_cmdline (char *arglist[], char buffer[])
 	}
 	fd_tmp = 0;
 	pipe_mode = 0;
+	return 0;
+}
+
+int exec_script (char pathname[], char buffer[], char *arglist[])
+{
+	FILE *fp;
+	fp = fopen(pathname, "r");
+	if (fp == NULL) {
+		perror("fopen");
+		exit(EXIT_FAILURE);
+	}
+	char c;
+	int pos = 0;
+	while (1) {
+		c = getc(fp);
+		if (c == '\n' || c == EOF) {
+			buffer[pos++] = '\0';
+			if (strlen(buffer) == 0)
+				break;
+			exec_cmdline (arglist, buffer);
+			memset(buffer, '\0', 512);
+			memset(arglist, 0, 80);
+			pos = 0;
+			if (c == EOF)
+				break;
+		} else {
+			buffer[pos++] = c;
+		}
+	}
+	fclose(fp);
 	return 0;
 }
 
