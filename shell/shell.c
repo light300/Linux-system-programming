@@ -183,6 +183,9 @@ int is_pipe_command (char buffer[])
 	return pipe_mode;
 }
 
+int is_env_command (char *arglist[]);
+int exec_env_cmdline (char *arglist[]);
+
 int exec_cmdline (char *arglist[], char buffer[])
 {
 	char *temp = buffer;
@@ -199,7 +202,12 @@ int exec_cmdline (char *arglist[], char buffer[])
 			return 0;
 		if (is_builtin_cmd(arglist)) {
         	exec_builtin_cmd(arglist);
-			return 0;
+			continue; // becaus of pipe cmd
+			//return 0;
+		}
+		if (is_env_command(arglist)) {
+			exec_env_cmdline(arglist);
+			continue;
 		}
 		if (pipe_mode > 0) {
 			int fd[2];
