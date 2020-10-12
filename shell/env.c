@@ -4,13 +4,10 @@
 
 #define MAX_VAL 10
 
-struct val {
+struct val_struct {
 	char name[20];
 	char value[40];
 };
-
-int val_num = 0;
-struct val val_array[MAX_VAL];
 
 int env_count = 0;
 char *env_array[256] = {0};
@@ -53,7 +50,7 @@ int is_env_command (char *arglist[])
 	if (search_char('=', arglist))
 		return 1;
 	if(strcmp (arglist[0], "export") == 0)
-		return 0;
+		return 1;
 	return 0;
 }
 
@@ -71,9 +68,36 @@ void env_cmd_set  (void)
 		printf("%s\n", env_array[i++]);
 }
 
+int env_cmd_export (char *arglist[])
+{
+    struct val_struct val = {{0},{0}};  
+    char *temp = arglist[1];
+    int i = 0;
+    while (*temp != '=')
+    {
+        val.name[i++] = *temp;
+        temp++;
+    }
+    val.name[i] = '\0';
+    temp++;
+    i = 0;
+    while (*temp != '\0')
+    {
+        val.value[i++] = *temp;
+        temp++;
+    }
+    val.value[i] = '\0';
+    setenv (val.name, val.value, 1);
+    return 0;
+}
+
 int env_cmd_store (char *arglist[])
 {
-	char *temp = arglist[0];
+	char *temp;
+	if (is_export_cmd(arglist))
+		temp = arglist[1];
+	else
+		temp = arglist[0];
 	int len = strlen(temp);
 	env_array[env_count] = (char *)malloc(len);
 	strcpy(env_array[env_count], temp);
@@ -87,5 +111,10 @@ int exec_env_cmdline (char *arglist[])
 		env_cmd_set();
 	if (search_char('=', arglist))
 		env_cmd_store(arglist);
+	if (strcmp(arglist[0], "export") == 0)
+    {
+        env_cmd_store (arglist);
+        env_cmd_export (arglist);
+    }
 	return 0;
 }
