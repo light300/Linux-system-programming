@@ -5,7 +5,7 @@
 #include <time.h>
 #include <sys/types.h>
 
-int builtin_cmd_time (void)
+static int builtin_cmd_time (void)
 {
 	char *wday[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 	time_t timep;
@@ -17,7 +17,7 @@ int builtin_cmd_time (void)
 	return 0;
 }
 
-int builtin_cmd_pwd (void)
+static int builtin_cmd_pwd (void)
 {
 	char path[256];
 	getcwd(path, 256);
@@ -25,7 +25,7 @@ int builtin_cmd_pwd (void)
 	return 0;
 }
 
-int builtin_cmd_exit (void)
+static int builtin_cmd_exit (void)
 {
 	void shell_env_cleanup (void);
 	shell_env_cleanup();
@@ -40,7 +40,7 @@ int builtin_cmd_exit (void)
 	return 0;
 }
 
-int builtin_cmd_cd (char path[])
+static int builtin_cmd_cd (char path[])
 {
 	int ret;
 	ret = chdir(path);

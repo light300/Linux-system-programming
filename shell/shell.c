@@ -8,6 +8,10 @@
 #include <time.h>
 #include <signal.h>
 
+#include "syntax.h"
+#include "builtin_cmd.h"
+#include "env.h"
+
 int read_cmd (char buffer[]);
 int pars_cmd (char buffer[], char *arglist[]);
 int exec_cmd (char *arglist[], int fd_in, int fd_out);
@@ -15,18 +19,6 @@ int exec_cmdline  (char *arglist[], char buffer[]);
 int exec_script (char pathname[], char buffer[], char *arglist[]);
 int free_cmd (char *arglist[], int arg_num);
 void print_cmd_user(void);
-
-struct ctl_cmd_info{
-    int if_result;
-    int if_block;
-    int else_block;
-};
-int is_control_cmdline (char buffer[]);
-int is_exec_cmdline (struct ctl_cmd_info cmd_info);
-void process_control_cmdline (char buf[], struct ctl_cmd_info *cmd_info);
-
-void shell_env_setup (void);
-void shell_env_cleanup (void);
 
 int background_exec = 0;
 /*
@@ -129,9 +121,6 @@ int pars_cmd (char buffer[], char *arglist[])
 	return arg_num;
 }
 
-int is_builtin_cmd (char *arglist[]);
-int exec_builtin_cmd (char *arglist[]);
-
 int exec_cmd (char *arglist[], int fd_in, int fd_out)
 {
 	int ret_from_fork;
@@ -187,9 +176,6 @@ int is_pipe_command (char buffer[])
     }
 	return pipe_mode;
 }
-
-int is_env_command (char *arglist[]);
-int exec_env_cmdline (char *arglist[]);
 
 int exec_cmdline (char *arglist[], char buffer[])
 {

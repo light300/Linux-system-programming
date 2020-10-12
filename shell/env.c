@@ -32,7 +32,7 @@ void shell_env_cleanup (void)
         free(env_array[i++]);
 }
 
-int search_char (char ch, char *arglist[])
+static int search_char (char ch, char *arglist[])
 {
 	char *p = arglist[0];
 	while (*p != '\0') {
@@ -54,21 +54,21 @@ int is_env_command (char *arglist[])
 	return 0;
 }
 
-int is_export_cmd (char *arglist[])
+static int is_export_cmd (char *arglist[])
 {
     if (strcmp(arglist[0], "export") == 0)
         return 1;
     return 0;
 }
 
-void env_cmd_set  (void)
+static void env_cmd_set  (void)
 {
 	int i = 0;
 	while (env_array[i])
 		printf("%s\n", env_array[i++]);
 }
 
-int env_cmd_export (char *arglist[])
+static int env_cmd_export (char *arglist[])
 {
     struct val_struct val = {{0},{0}};  
     char *temp = arglist[1];
@@ -91,7 +91,7 @@ int env_cmd_export (char *arglist[])
     return 0;
 }
 
-int env_cmd_store (char *arglist[])
+static int env_cmd_store (char *arglist[])
 {
 	char *temp;
 	if (is_export_cmd(arglist))
