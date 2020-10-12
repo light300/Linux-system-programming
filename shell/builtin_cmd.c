@@ -27,6 +27,8 @@ int builtin_cmd_pwd (void)
 
 int builtin_cmd_exit (void)
 {
+	void shell_env_cleanup (void);
+	shell_env_cleanup();
 	int ret;
 	pid_t pid;
 	pid = getpid();

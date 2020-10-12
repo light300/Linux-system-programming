@@ -62,12 +62,12 @@ static int is_if_cmdline_true (char buffer[])
         free(arg_array[1]);
         return result;
     }
-    if (strncmp (arg_array[0], "-d", 2) == 0) {
+    if (strncmp(arg_array[0], "-d", 2) == 0) {
         int result = 0;
-        if ((access (arg_array[1], F_OK)) != -1)
+        if ((access(arg_array[1], F_OK)) != -1)
             result = 1;
-        free (arg_array[0]);
-        free (arg_array[1]);
+        free(arg_array[0]);
+        free(arg_array[1]);
         return result;
     }
     return 0;
@@ -81,11 +81,11 @@ void process_control_cmdline (char buf[], struct ctl_cmd_info *cmd_info)
         if (is_if_cmdline_true(buf))
             cmd_info->if_result = 1;
     }
-    if (strncmp (buf, "else", 4) == 0) {
+    if (strncmp(buf, "else", 4) == 0) {
         cmd_info->if_block = 0;
         cmd_info->else_block = 1;
     }
-    if (strncmp (buf, "fi", 2) == 0) {
+    if (strncmp(buf, "fi", 2) == 0) {
         cmd_info->if_block = 0;
         cmd_info->else_block = 0;
         cmd_info->if_result = 0;

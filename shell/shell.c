@@ -25,6 +25,9 @@ int is_control_cmdline (char buffer[]);
 int is_exec_cmdline (struct ctl_cmd_info cmd_info);
 void process_control_cmdline (char buf[], struct ctl_cmd_info *cmd_info);
 
+void shell_env_setup (void);
+void shell_env_cleanup (void);
+
 int background_exec = 0;
 /*
 	1: background exec mode
@@ -42,6 +45,7 @@ int main (int argc, char *argv[])
 	char buffer[512] = {0};
 	char *arglist[20] = {0};
 	
+	shell_env_setup ();
 	if (argc == 1) {
 		while (1) {
 			print_cmd_user();
@@ -52,6 +56,7 @@ int main (int argc, char *argv[])
 		}
 	} else {
 		exec_script(argv[1], buffer, arglist);
+		shell_env_cleanup();
 	}
 
 	printf("main shell exit\n");
